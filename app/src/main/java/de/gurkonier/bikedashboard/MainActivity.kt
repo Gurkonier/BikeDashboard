@@ -1,7 +1,9 @@
 package de.gurkonier.bikedashboard
 
 import android.annotation.*
+import android.content.*
 import android.os.*
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.*
@@ -12,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
-import androidx.compose.ui.Alignment.Companion.TopCenter
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
+import de.gurkonier.bikedashboard.receiver.*
 import de.gurkonier.bikedashboard.ui.theme.*
 import de.gurkonier.bikedashboard.uicomponents.*
 import de.gurkonier.bikedashboard.utils.*
@@ -45,12 +47,26 @@ class MainActivity : ComponentActivity() {
             )
         )
         setContent {
+
             var settings by remember {
                 mutableStateOf(false)
             }
             var currentDate = remember {
                 mutableStateOf(Date())
             }
+            var level by remember {
+                mutableStateOf(0)
+            }
+            registerReceiver(BatteryLevelReceiver(object :
+                BatteryLevelReceiver.BatteryLevelListener {
+                override fun onLevelUpdated(newLevel: Int) {
+                    level = newLevel
+                    Log.d("BATTERY_STATUS", "New level received: $newLevel")
+                }
+
+            }),
+                IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+            )
             BikeDashboardTheme {
                 // A surface container using the 'background' color from the theme
                 LaunchedEffect(key1 = "bla", block = {
@@ -73,7 +89,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     if (!settings) {
                         //TODO: Add battery percentage functionality
-                        DashboardArea(currentDate) {
+                        DashboardArea(currentDate, batteryLevel = level/100f) {
                             settings = true
                         }
                     } else {
