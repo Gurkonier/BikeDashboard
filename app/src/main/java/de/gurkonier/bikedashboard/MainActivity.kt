@@ -177,7 +177,7 @@ fun DashboardArea(
 @SuppressLint("UnrememberedMutableState")
 @Preview(
     showBackground = true,
-    device = "spec:id=reference_phone,shape=Normal,width=1040,height=480,unit=dp,dpi=512"
+    device = "spec:parent=pixel_7_pro,orientation=landscape"
 )
 @Composable
 fun GreetingPreview() {
