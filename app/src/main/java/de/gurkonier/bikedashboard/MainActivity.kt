@@ -4,6 +4,7 @@ import android.annotation.*
 import android.os.*
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -12,12 +13,15 @@ import androidx.compose.ui.*
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.TopCenter
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.*
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
 import de.gurkonier.bikedashboard.ui.theme.*
+import de.gurkonier.bikedashboard.uicomponents.*
 import de.gurkonier.bikedashboard.utils.*
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
@@ -25,28 +29,41 @@ import java.util.*
 
 var displayCutoutHeight: Int = 0
 
+val sdfHours = SimpleDateFormat("HH")
+val sdfMinutes = SimpleDateFormat("mm")
+val sdfSeconds = SimpleDateFormat("ss")
+val sdfDate = SimpleDateFormat("dd.MM.yyyy, E")
+
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        PreferencesManager.instantiate(getSharedPreferences(getString(R.string.pref_key), MODE_PRIVATE))
+        PreferencesManager.instantiate(
+            getSharedPreferences(
+                getString(R.string.pref_key),
+                MODE_PRIVATE
+            )
+        )
         setContent {
             var settings by remember {
                 mutableStateOf(false)
             }
-            var currentDate = remember{
+            var currentDate = remember {
                 mutableStateOf(Date())
             }
             BikeDashboardTheme {
                 // A surface container using the 'background' color from the theme
                 LaunchedEffect(key1 = "bla", block = {
                     MainScope().launch {
-                        while (true){
+                        while (true) {
                             currentDate.value = Date()
-                            delay(if(PreferencesManager.secondsEnabled){
-                                1000
-                            }else{
-                                60000
-                            })
+                            delay(
+                                if (PreferencesManager.secondsEnabled) {
+                                    1000
+                                } else {
+                                    60000
+                                }
+                            )
                         }
                     }
                 })
@@ -55,6 +72,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     if (!settings) {
+                        //TODO: Add battery percentage functionality
                         DashboardArea(currentDate) {
                             settings = true
                         }
@@ -67,14 +85,16 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-    }
 }
 
 @Composable
-fun DashboardArea(currentDate: MutableState<Date>, onClick: () -> Unit) {
+fun DashboardArea(
+    currentDate: MutableState<Date>,
+    batteryLevel: Float = 0.75f,
+    debug: Boolean = false,
+    onClick: () -> Unit
+) {
+    val batIndColor = if (batteryLevel > 0.2f) Color.Green else Color.Red
     Box(
         Modifier
             .fillMaxSize()
@@ -83,47 +103,55 @@ fun DashboardArea(currentDate: MutableState<Date>, onClick: () -> Unit) {
             }
             .background(Color.Black)
     ) {
-        if(PreferencesManager.batteryEnabled) {
-            Box(
-                Modifier
-                    .align(TopCenter)
-                    .padding(top = 32.dp)
-            ) {
-                LinearProgressIndicator(
-                    progress = 0.75f,
-                    Modifier
-                        .height(48.dp)
-                        .fillMaxWidth(0.6f),
-                    color = Color.Green
-                )
+        Column(
+            Modifier
+                .align(Center)
+        ) {
+            Column(Modifier.align(CenterHorizontally)) {
+                if (PreferencesManager.dateEnabled || debug) {
+                    Text(
+                        sdfDate.format(currentDate.value),
+                        fontSize = 32.sp,
+                        color = Color.White
+                    )
+                }
                 Text(
-
-                    "75 %",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Center),
-                    color = Color.Black
+                    text =
+                    if (PreferencesManager.secondsEnabled) {
+                        buildAnnotatedString {
+                            append(sdfHours.format(currentDate.value))
+                            withStyle(style = SpanStyle(color = batIndColor)) {
+                                append(":")
+                            }
+                            append(sdfMinutes.format(currentDate.value))
+                            withStyle(style = SpanStyle(color = batIndColor)) {
+                                append(":")
+                            }
+                            append(sdfSeconds.format(currentDate.value))
+                        }
+                    } else {
+                        buildAnnotatedString {
+                            append(sdfHours.format(currentDate.value))
+                            withStyle(style = SpanStyle(color = batIndColor)) {
+                                append(":")
+                            }
+                            append(sdfMinutes.format(currentDate.value))
+                        }
+                    },
+                    fontSize = 192.sp,
+                    color = Color.White,
+                    modifier = Modifier
+                        .align(CenterHorizontally)
                 )
             }
-        }
-        Column(
-            Modifier.align(Center)
-        ) {
-            Text(
-                text = SimpleDateFormat(if(PreferencesManager.secondsEnabled){
-                    "HH:mm:ss"
-                }else{
-                    "HH:mm"
-                }).format(currentDate.value),
-                fontSize = 192.sp,
-                color = Color.White
-            )
-            if (PreferencesManager.dateEnabled) {
-                Text(
-                    SimpleDateFormat("dd.MM.yyyy, E").format(currentDate.value),
-                    fontSize = 32.sp,
-                    modifier = Modifier.align(CenterHorizontally),
-                    color = Color.White
+
+            if (PreferencesManager.batteryEnabled || debug) {
+                BorderedProgressIndicator(
+                    Modifier
+                        .align(CenterHorizontally)
+                        .fillMaxWidth(0.6f),
+                    color = batIndColor,
+                    progress = batteryLevel
                 )
             }
         }
@@ -138,6 +166,6 @@ fun DashboardArea(currentDate: MutableState<Date>, onClick: () -> Unit) {
 @Composable
 fun GreetingPreview() {
     BikeDashboardTheme {
-        DashboardArea(mutableStateOf(Date())){}
+        DashboardArea(mutableStateOf(Date()), batteryLevel = 0.2f, debug = true) {}
     }
 }

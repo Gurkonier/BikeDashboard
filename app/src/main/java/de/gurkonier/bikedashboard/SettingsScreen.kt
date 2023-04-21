@@ -123,6 +123,7 @@ object SettingsScreen {
         }
     }
 
+    //TODO: Update Preview to match new Dashboard
     @Composable
     fun PreviewColors() {
         Text(
