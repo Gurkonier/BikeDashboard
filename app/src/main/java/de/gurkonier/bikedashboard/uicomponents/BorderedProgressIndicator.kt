@@ -17,7 +17,9 @@ fun BorderedProgressIndicator(
     modifier: Modifier = Modifier,
     progress: Float,
     color: Color = Color.Green,
-    fontSize: TextUnit = 24.sp
+    fontSize: TextUnit = 24.sp,
+    strokeThickness: Dp = 6.dp,
+    cornerRadius: Dp = 12.dp
 ) {
     Box(
         modifier
@@ -26,13 +28,13 @@ fun BorderedProgressIndicator(
         Box(
             Modifier
                 .fillMaxSize()
-                .border(6.dp, Color.Gray, RoundedCornerShape(12.dp))
+                .border(strokeThickness, Color.Gray, RoundedCornerShape(cornerRadius))
         )
         Box(
             Modifier
                 .fillMaxWidth(progress)
                 .fillMaxHeight()
-                .border(6.dp, color, RoundedCornerShape(12.dp))
+                .border(strokeThickness, color, RoundedCornerShape(cornerRadius))
         )
         Text(
             "${(progress * 100).roundToInt()} %",
