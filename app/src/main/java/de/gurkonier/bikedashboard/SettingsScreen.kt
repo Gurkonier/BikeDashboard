@@ -13,10 +13,20 @@ import androidx.compose.ui.text.font.*
 import androidx.compose.ui.tooling.preview.*
 import androidx.compose.ui.unit.*
 import de.gurkonier.bikedashboard.ui.theme.*
+import de.gurkonier.bikedashboard.utils.*
 
 object SettingsScreen {
     @Composable
     fun SettingsScreen(onReturn: () -> Unit) {
+        val secondsEnabled = remember {
+            mutableStateOf(PreferencesManager.secondsEnabled)
+        }
+        val batteryEnabled = remember {
+            mutableStateOf(PreferencesManager.batteryEnabled)
+        }
+        val dateEnabled = remember {
+            mutableStateOf(PreferencesManager.dateEnabled)
+        }
         Row(
             Modifier.fillMaxSize()
         ) {
@@ -41,10 +51,26 @@ object SettingsScreen {
             ) {
                 SwitchSetting(
                     "Sekundenanzeige",
-                    "Die Anzeige von Sekunden\nkann zu einer höheren\nAkkunutzung führen."
-                )
-                SwitchSetting("Akkustand", topPadding = true)
-                SwitchSetting("Datum anzeigen", topPadding = true)
+                    secondsEnabled,
+                    description = "Die Anzeige von Sekunden\nkann zu einer höheren\nAkkunutzung führen."
+                ){
+                    secondsEnabled.value = it
+                    PreferencesManager.secondsEnabled = it
+                }
+                SwitchSetting(
+                    "Akkustand",
+                    batteryEnabled, topPadding = true
+                ){
+                    batteryEnabled.value = it
+                    PreferencesManager.batteryEnabled = it
+                }
+                SwitchSetting(
+                    "Datum anzeigen",
+                    dateEnabled, topPadding = true
+                ){
+                    dateEnabled.value = it
+                    PreferencesManager.dateEnabled = it
+                }
                 Spacer(Modifier.weight(1f))
                 Button(onClick = onReturn, Modifier.align(Alignment.End)) {
                     Text(text = "Speichern")
@@ -54,7 +80,13 @@ object SettingsScreen {
     }
 
     @Composable
-    fun SwitchSetting(title: String, description: String? = null, topPadding: Boolean = false) {
+    fun SwitchSetting(
+        title: String,
+        enabled: MutableState<Boolean>,
+        description: String? = null,
+        topPadding: Boolean = false,
+        onCheckChanged: (Boolean) -> Unit
+    ) {
         if (topPadding) {
             Box(
                 Modifier.height(8.dp)
@@ -84,10 +116,8 @@ object SettingsScreen {
             }
             Spacer(modifier = Modifier.weight(1f))
             Switch(
-                checked = false,
-                onCheckedChange = {
-
-                },
+                checked = enabled.value,
+                onCheckedChange = onCheckChanged,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
@@ -107,12 +137,12 @@ object SettingsScreen {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
                 .background(Color.Black)
-        ){
+        ) {
             Box(
                 Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 16.dp)
-            ){
+            ) {
                 LinearProgressIndicator(
                     progress = 0.75f,
                     Modifier
@@ -198,6 +228,6 @@ object SettingsScreen {
 )
 fun SettingsPreview() {
     BikeDashboardTheme {
-        SettingsScreen.SettingsScreen(){}
+        SettingsScreen.SettingsScreen() {}
     }
 }

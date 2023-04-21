@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BikeDashboard</string>
+    <string name="pref_key">de.gurkonier.bikedashboard.PREFERENCES</string>
 </resources>
