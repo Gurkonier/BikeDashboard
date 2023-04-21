@@ -113,7 +113,7 @@ fun DashboardArea(currentDate: MutableState<Date>, onClick: () -> Unit) {
                 text = SimpleDateFormat(if(PreferencesManager.secondsEnabled){
                     "HH:mm:ss"
                 }else{
-                    "HH:mm:ss"
+                    "HH:mm"
                 }).format(currentDate.value),
                 fontSize = 192.sp,
                 color = Color.White
