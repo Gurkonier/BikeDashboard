@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.text.*
@@ -19,15 +20,15 @@ import de.gurkonier.bikedashboard.utils.*
 
 object SettingsScreen {
     @Composable
-    fun SettingsScreen(onReturn: () -> Unit) {
+    fun SettingsScreen(debug: Boolean = false, onReturn: () -> Unit) {
         val secondsEnabled = remember {
-            mutableStateOf(PreferencesManager.secondsEnabled)
+            mutableStateOf(if(debug) true else PreferencesManager.secondsEnabled)
         }
         val batteryEnabled = remember {
-            mutableStateOf(PreferencesManager.batteryEnabled)
+            mutableStateOf(if(debug) true else PreferencesManager.batteryEnabled)
         }
         val dateEnabled = remember {
-            mutableStateOf(PreferencesManager.dateEnabled)
+            mutableStateOf(if(debug) true else PreferencesManager.dateEnabled)
         }
         Row(
             Modifier.fillMaxSize()
@@ -105,7 +106,7 @@ object SettingsScreen {
             ) {
                 Text(
                     text = title,
-                    fontSize = 20.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
                 description?.let {
@@ -133,9 +134,9 @@ object SettingsScreen {
     ) {
         Text(
             "Vorschau",
-            fontSize = 24.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 32.dp, bottom = 8.dp)
+            modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
         )
         Box(
             Modifier
@@ -179,7 +180,7 @@ object SettingsScreen {
                                 append("45")
                             }
                         },
-                        fontSize = 64.sp,
+                        fontSize = 64.nonScaledSp,
                         color = Color.White,
                         modifier = Modifier
                             .align(CenterHorizontally)
@@ -244,14 +245,14 @@ object SettingsScreen {
     private fun ColorSettings() {
         Text(
             "Darstellung",
-            fontSize = 24.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
         Row(
             Modifier.padding(top = 8.dp)
         ) {
             ColorCard("Hintergrund", Color.Black)
-            ColorCard("Textfarbe", Color.White, Modifier.padding(start = 16.dp))
+            ColorCard("Text", Color.White, Modifier.padding(start = 16.dp))
         }
     }
 
@@ -260,10 +261,11 @@ object SettingsScreen {
         Card(modifier) {
             Row(
                 Modifier
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Box(
                     Modifier
+                        .align(CenterVertically)
                         .size(32.dp)
                         .clip(CircleShape)
                         .background(Color.Black)
@@ -288,8 +290,13 @@ object SettingsScreen {
     showBackground = true,
     device = "spec:parent=pixel_7_pro,orientation=landscape"
 )
+@Preview(
+    showBackground = true,
+    device = "spec:parent=pixel_7_pro,orientation=landscape", fontScale = 1.5f,
+    name = "Settings - FontScale: 1.5"
+)
 fun SettingsPreview() {
     BikeDashboardTheme {
-        SettingsScreen.SettingsScreen() {}
+        SettingsScreen.SettingsScreen(debug = true) {}
     }
 }

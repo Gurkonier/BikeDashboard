@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.*
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.*
@@ -154,7 +155,7 @@ fun DashboardArea(
                             append(sdfMinutes.format(currentDate.value))
                         }
                     },
-                    fontSize = 192.sp,
+                    fontSize = 192.nonScaledSp,
                     color = Color.White,
                     modifier = Modifier
                         .align(CenterHorizontally)
@@ -177,7 +178,12 @@ fun DashboardArea(
 @SuppressLint("UnrememberedMutableState")
 @Preview(
     showBackground = true,
-    device = "spec:parent=pixel_7_pro,orientation=landscape"
+    device = "spec:parent=pixel_7_pro,orientation=landscape", name = "Dashboard"
+)
+@Preview(
+    showBackground = true,
+    device = "spec:parent=pixel_7_pro,orientation=landscape", fontScale = 1.5f,
+    name = "Dashboard - FontScale: 1.5"
 )
 @Composable
 fun GreetingPreview() {
@@ -185,3 +191,7 @@ fun GreetingPreview() {
         DashboardArea(mutableStateOf(Date()), batteryLevel = 0.2f, debug = true) {}
     }
 }
+
+val Int.nonScaledSp
+    @Composable
+    get() = (this / LocalDensity.current.fontScale).sp
